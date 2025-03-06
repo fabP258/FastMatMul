@@ -6,9 +6,9 @@
 int main() {
 
     // Matrix sizes
-    size_t M = 300U;
-    size_t N = 250U;
-    size_t P = 200U;
+    size_t M = 3000U;
+    size_t N = 2500U;
+    size_t P = 2000U;
 
     matrix_t A = createMatrix(M, N, (DATA_TYPE)1);
     if (A.data == NULL) {
@@ -23,7 +23,7 @@ int main() {
 
     // Perform matmul
     clock_t start = clock();
-    matrix_t C = naiveMatmul(&A, &B);
+    matrix_t C = matmul(&A, &B);
     clock_t end = clock();
     double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
 
