@@ -2,4 +2,4 @@
 
 #include "matrix.h"
 
-matrix_t matmul(matrix_t *A, matrix_t *B);
+matrix_t naiveMatmul(matrix_t *A, matrix_t *B);

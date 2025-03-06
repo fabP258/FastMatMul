@@ -1,6 +1,6 @@
 #include "linalg.h"
 
-matrix_t matmul(matrix_t *A, matrix_t *B) {
+matrix_t naiveMatmul(matrix_t *A, matrix_t *B) {
     matrix_t result;
     if (A->data == NULL || B->data == NULL || (A->num_cols != B->num_rows)) {
         result.data = NULL;
