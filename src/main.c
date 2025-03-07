@@ -23,7 +23,8 @@ int main() {
 
     // Perform matmul
     clock_t start = clock();
-    matrix_t C = matmul(&A, &B);
+    EMatmulAlgorithm algorithm = OPTIMIZED_LOOP_ORDER;
+    matrix_t C = matmul(&A, &B, algorithm);
     clock_t end = clock();
     double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
 

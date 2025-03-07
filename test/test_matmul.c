@@ -4,7 +4,7 @@
 #include "matrix.h"
 #include "linalg.h"
 
-#define EPS 1
+#define EPS 1e-6
 
 void test_matmul() {
     matrix_t A = createMatrix(3U, 4U, (DATA_TYPE)0);
@@ -52,7 +52,9 @@ void test_matmul() {
     B.data[3][3] = (DATA_TYPE)2;
     B.data[3][4] = (DATA_TYPE)4;
 
-    matrix_t C = matmul(&A, &B);
+    // TODO: Iterate over all algorithms
+    EMatmulAlgorithm algorithm = NAIVE;
+    matrix_t C = matmul(&A, &B, algorithm);
     assert(C.data != NULL);
 
     // Expected matrix

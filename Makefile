@@ -4,7 +4,7 @@ TEST_DIR = test
 BUILD_DIR = build
 
 CC = gcc
-CFLAGS = -O3 -I $(LIB_DIR)
+CFLAGS = -O3 -I $(LIB_DIR) -mavx2
 
 SRC_FILES = $(wildcard $(SRC_DIR)/*.c)
 LIB_FILES = $(wildcard $(LIB_DIR)/*.c)

@@ -2,6 +2,11 @@
 
 #include "matrix.h"
 
-matrix_t matmul(matrix_t *A, matrix_t *B);
-matrix_t matmulNaive(matrix_t *A, matrix_t *B);
-matrix_t matmulLoopOrderOptimized(matrix_t *A, matrix_t *B);
+typedef enum {
+    NAIVE,
+    OPTIMIZED_LOOP_ORDER,
+} EMatmulAlgorithm;
+
+matrix_t matmul(matrix_t *A, matrix_t *B, EMatmulAlgorithm algorithm);
+void matmulNaive(matrix_t *A, matrix_t *B, matrix_t *result);
+void matmulLoopOrderOptimized(matrix_t *A, matrix_t *B, matrix_t *result);
