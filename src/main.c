@@ -34,7 +34,7 @@ int main() {
     unsigned long num_ops = 2 * M * N * P;
     double flops = (double)num_ops / time_taken;
     double gflops = flops / 1e9;
-    printf("Number of operations (adds & multiplies): %d\n", num_ops);
+    printf("Number of operations (adds & multiplies): %lu\n", num_ops);
     printf("Performing matmul took: %.12f s\n", time_taken);
     printf("FLOP/s: %.2f\n", flops);
     printf("GFLOP/s: %.2f\n", gflops);
