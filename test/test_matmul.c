@@ -5,8 +5,23 @@
 #include "linalg.h"
 
 #define EPS 1e-6
+#define NUM_ALGORITHMS 2
 
-void test_matmul() {
+int testMatrixEquality(matrix_t *A, matrix_t *B, DATA_TYPE eps) {
+    if (A->num_rows != B->num_rows || A->num_cols != B->num_cols) {
+        return 0;
+    }
+    for (size_t i = 0; i < A->num_rows; i++) {
+        for (size_t j = 0; j < A->num_cols; j++) {
+            if (fabs(A->data[i][j] - B->data[i][j]) > eps) {
+                return 0;
+            }
+        }
+    }
+    return 1;
+}
+
+void testMatmul() {
     matrix_t A = createMatrix(3U, 4U, (DATA_TYPE)0);
     assert(A.data != NULL);
     matrix_t B = createMatrix(4U, 5U, (DATA_TYPE)0);
@@ -52,11 +67,6 @@ void test_matmul() {
     B.data[3][3] = (DATA_TYPE)2;
     B.data[3][4] = (DATA_TYPE)4;
 
-    // TODO: Iterate over all algorithms
-    EMatmulAlgorithm algorithm = NAIVE;
-    matrix_t C = matmul(&A, &B, algorithm);
-    assert(C.data != NULL);
-
     // Expected matrix
     matrix_t expectedResult = createMatrix(3U, 5U, (DATA_TYPE)0);
     assert(expectedResult.data != NULL);
@@ -78,17 +88,14 @@ void test_matmul() {
     expectedResult.data[2][3] = (DATA_TYPE)4;
     expectedResult.data[2][4] = (DATA_TYPE)8;
 
-    // Test shape
-    assert(C.num_rows == expectedResult.num_rows);
-    assert(C.num_cols == expectedResult.num_cols);
-
-    // Check result
-    for (size_t i = 0; i < C.num_rows; i++) {
-        for (size_t j = 0; j < C.num_cols; j++) {
-            assert(fabs(C.data[i][j] - expectedResult.data[i][j]) < EPS);
-        }
+    EMatmulAlgorithm algorithms[NUM_ALGORITHMS] = { NAIVE, OPTIMIZED_LOOP_ORDER };
+    
+    matrix_t C;
+    for (size_t i = 0; i < NUM_ALGORITHMS; i++) {
+        C = matmul(&A, &B, algorithms[i]);
+        assert(C.data != NULL);
+        assert(testMatrixEquality(&C, &expectedResult, (DATA_TYPE)EPS));
     }
-
     printf("[TEST: Matmul] PASSED\n");
 
     freeMatrix(&A);
@@ -97,6 +104,6 @@ void test_matmul() {
 }
 
 int main() {
-    test_matmul();
+    testMatmul();
     return 0;
 }
