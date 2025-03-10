@@ -6,9 +6,9 @@
 int main() {
 
     // Matrix sizes
-    size_t M = 3000U;
-    size_t N = 2500U;
-    size_t P = 2000U;
+    size_t M = 5000U;
+    size_t N = 5000U;
+    size_t P = 5000U;
 
     matrix_t A = createMatrix(M, N, (DATA_TYPE)1);
     if (A.data == NULL) {
@@ -30,10 +30,10 @@ int main() {
 
     printf("Result matrix has shape: [%d,%d]\n", C.num_rows, C.num_cols);
 
-    unsigned long num_ops = 2 * M * N * P;
-    double flops = (double)num_ops / time_taken;
+    double num_ops = 2.0 * (double)M * (double)N * (double)P;
+    double flops = num_ops / time_taken;
     double gflops = flops / 1e9;
-    printf("Number of operations (adds & multiplies): %lu\n", num_ops);
+    printf("Number of operations (adds & multiplies): %f\n", num_ops);
     printf("Performing matmul took: %.12f s\n", time_taken);
     printf("FLOP/s: %.2f\n", flops);
     printf("GFLOP/s: %.2f\n", gflops);
