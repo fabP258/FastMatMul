@@ -30,8 +30,6 @@ int main() {
 
     printf("Result matrix has shape: [%d,%d]\n", C.num_rows, C.num_cols);
 
-    // TODO: check if matmul is correct
-
     unsigned long num_ops = 2 * M * N * P;
     double flops = (double)num_ops / time_taken;
     double gflops = flops / 1e9;
