@@ -52,9 +52,6 @@ void testMatmul() {
     A.data[10] = (DATA_TYPE)2;
     A.data[11] = (DATA_TYPE)1;
 
-    printf("Input matrix A with shape [%lu,%lu]: \n", A.numRows, A.numCols);
-    printMatrix(&A);
-
     B.data[0] = (DATA_TYPE)4;
     B.data[1] = (DATA_TYPE)2;
     B.data[2] = (DATA_TYPE)2;
@@ -75,9 +72,6 @@ void testMatmul() {
     B.data[17] = (DATA_TYPE)1;
     B.data[18] = (DATA_TYPE)2;
     B.data[19] = (DATA_TYPE)4;
-
-    printf("Input matrix B with shape [%lu,%lu]: \n", B.numRows, B.numCols);
-    printMatrix(&B);
 
     // Expected matrix
     matrix_t expectedResult = createMatrix(3U, 5U, (DATA_TYPE)0);
@@ -106,14 +100,6 @@ void testMatmul() {
     for (size_t i = 0; i < NUM_ALGORITHMS; i++) {
         C = matmul(&A, &B, algorithms[i]);
         assert(C.data != NULL);
-
-        printf("Calculated GEMM: \n");
-        printMatrix(&C);
-
-        printf("\n");
-        printf("Expected result: \n");
-        printMatrix(&expectedResult);
-
         assert(testMatrixEquality(&C, &expectedResult, (DATA_TYPE)EPS));
         printf("[TEST: Matmul with algorithm %d] PASSED\n", algorithms[i]);
     }
