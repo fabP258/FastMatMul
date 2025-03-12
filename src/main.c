@@ -6,9 +6,9 @@
 int main() {
 
     // Matrix sizes
-    size_t M = 5000U;
-    size_t N = 5000U;
-    size_t P = 5000U;
+    size_t M = 1000U;
+    size_t N = 1000U;
+    size_t P = 1000U;
 
     matrix_t A = createMatrix(M, N, (DATA_TYPE)1);
     if (A.data == NULL) {
@@ -23,12 +23,12 @@ int main() {
 
     // Perform matmul
     clock_t start = clock();
-    EMatmulAlgorithm algorithm = OPTIMIZED_LOOP_ORDER;
+    EMatmulAlgorithm algorithm = NAIVE;
     matrix_t C = matmul(&A, &B, algorithm);
     clock_t end = clock();
     double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
 
-    printf("Result matrix has shape: [%d,%d]\n", C.num_rows, C.num_cols);
+    printf("Result matrix has shape: [%d,%d]\n", C.numRows, C.numCols);
 
     double num_ops = 2.0 * (double)M * (double)N * (double)P;
     double flops = num_ops / time_taken;
