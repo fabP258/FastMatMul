@@ -2,11 +2,11 @@
 
 matrix_t matmul(matrix_t *A, matrix_t *B, EMatmulAlgorithm algorithm) {
     matrix_t result;
-    if (A->data == NULL || B->data == NULL || (A->num_cols != B->num_rows)) {
+    if (A->data == NULL || B->data == NULL || (A->numCols != B->numRows)) {
         result.data = NULL;
         return result;
     }
-    initMatrix(&result, A->num_rows, B->num_cols, (DATA_TYPE)0);
+    initMatrix(&result, A->numRows, B->numCols, (DATA_TYPE)0);
     if (result.data == NULL) {
         return result;
     }
@@ -26,22 +26,23 @@ matrix_t matmul(matrix_t *A, matrix_t *B, EMatmulAlgorithm algorithm) {
 }
 
 void matmulNaive(matrix_t *A, matrix_t *B, matrix_t *result) {
-    for (size_t i = 0; i < A->num_rows; i++) {
-        DATA_TYPE *row = A->data[i];
-        for (size_t j = 0; j < B->num_cols; j++) {
-            for (size_t k = 0; k < A->num_cols; k++) {
-                result->data[i][j] += row[k] * B->data[k][j];
+    DATA_TYPE temp = (DATA_TYPE)0;
+    for (size_t i = 0; i < A->numRows; i++) {
+        for (size_t j = 0; j < B->numCols; j++) {
+            temp = (DATA_TYPE)0;
+            for (size_t k = 0; k < A->numCols; k++) {
+                temp += A->data[i * A->numCols + k] * B->data[k * B->numCols + j];
             }
+            result->data[i * result->numCols + j] = temp;
         }
     }
 }
 
 void matmulLoopOrderOptimized(matrix_t *A, matrix_t *B, matrix_t *result) {
-    for (size_t i = 0; i < A->num_rows; i++) {
-        DATA_TYPE *row = A->data[i];
-        for (size_t k = 0; k < A->num_cols; k++) {
-            for (size_t j = 0; j < B->num_cols; j++) {
-                result->data[i][j] += row[k] * B->data[k][j];
+    for (size_t i = 0; i < A->numRows; i++) {
+        for (size_t k = 0; k < A->numCols; k++) {
+            for (size_t j = 0; j < B->numCols; j++) {
+                result->data[i * result->numCols+j] += A->data[i * A->numCols + k] * B->data[k * B->numCols + j];
             }
         }
     }
