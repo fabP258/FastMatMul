@@ -3,6 +3,24 @@
 #include "matrix.h"
 #include "linalg.h"
 
+double evaluateMatmulAlgorithm(matrix_t *A, matrix_t *B, EMatmulAlgorithm algorithm) {
+    matrix_t C;
+    clock_t start, end;
+
+    double numOps = 2.0 * (double)A->numRows * (double)B->numCols * (double)A->numCols;
+    start = clock();
+    C = matmul(A, B, algorithm);
+    end = clock();
+    if (C.data == NULL) {
+        printf("Algorithm %d: Matmul failed.", algorithm);
+    }
+    double timeTaken = ((double)(end - start)) / CLOCKS_PER_SEC;
+    double flops = numOps / timeTaken;
+    double gFlops = flops / 1e9;
+    printf("Algorithm %d, GLOP/s: %.2f\n", algorithm, gFlops);
+    freeMatrix(&C);
+}
+
 int main() {
 
     // Matrix sizes
@@ -21,25 +39,12 @@ int main() {
         return -1;
     }
 
-    // Perform matmul
-    clock_t start = clock();
-    EMatmulAlgorithm algorithm = NAIVE;
-    matrix_t C = matmul(&A, &B, algorithm);
-    clock_t end = clock();
-    double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
-
-    printf("Result matrix has shape: [%d,%d]\n", C.numRows, C.numCols);
-
-    double num_ops = 2.0 * (double)M * (double)N * (double)P;
-    double flops = num_ops / time_taken;
-    double gflops = flops / 1e9;
-    printf("Number of operations (adds & multiplies): %f\n", num_ops);
-    printf("Performing matmul took: %.12f s\n", time_taken);
-    printf("FLOP/s: %.2f\n", flops);
-    printf("GFLOP/s: %.2f\n", gflops);
+    EMatmulAlgorithm algorithms[2] = { NAIVE, OPTIMIZED_LOOP_ORDER };
+    for (size_t i = 0; i < 2; i++) {
+        evaluateMatmulAlgorithm(&A, &B, algorithms[i]);
+    }
 
     freeMatrix(&A);
     freeMatrix(&B);
-    freeMatrix(&C);
     return 0;
 }
