@@ -1,5 +1,9 @@
 #include "linalg.h"
 
+#ifdef USE_CBLAS
+#include <cblas.h>
+#endif
+
 matrix_t matmul(matrix_t *A, matrix_t *B, EMatmulAlgorithm algorithm) {
     matrix_t result;
     if (A->data == NULL || B->data == NULL || (A->numCols != B->numRows)) {
@@ -17,6 +21,11 @@ matrix_t matmul(matrix_t *A, matrix_t *B, EMatmulAlgorithm algorithm) {
         case OPTIMIZED_LOOP_ORDER:
             matmulLoopOrderOptimized(A,B,&result);
             break;
+#ifdef USE_CBLAS
+        case BLAS_GEMM:
+            matmulBlas(A,B,&result);
+            break;
+#endif
         default:
             // TODO: catch this error
             freeMatrix(&result);
@@ -47,3 +56,11 @@ void matmulLoopOrderOptimized(matrix_t *A, matrix_t *B, matrix_t *result) {
         }
     }
 }
+
+#ifdef USE_CBLAS
+void matmulBlas(matrix_t *A, matrix_t *B, matrix_t *result) {
+    // TODO: Handle dtypes properly, this only works for float
+    openblas_set_num_threads(4);
+    cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, A->numRows, B->numCols, A->numCols, 1.0f, A->data, A->numCols, B->data, B->numCols, 0.0f, result->data, result->numCols);
+}
+#endif

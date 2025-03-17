@@ -14,13 +14,29 @@ OBJ_FILES = $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(SRC_FILES))
 LIB_OBJ = $(patsubst $(LIB_DIR)/%.c, $(BUILD_DIR)/%.o, $(LIB_FILES))
 TEST_OBJ_FILES = $(TEST_FILES:$(TEST_DIR)/%.c=$(BUILD_DIR)/%.o)
 
+# Check if OpenBLAS is available
+OPENBLAS_LIBS := $(firstword $(wildcard lib/*/lib/libopenblas.a))
+OPENBLAS_HEADERS := $(firstword $(wildcard lib/*/include/cblas.h))
+ifeq ($(wildcard $(OPENBLAS_LIBS)),)
+    USE_CBLAS = 0
+    $(info OpenBLAS lib not found, compiling without it.)
+else ifeq ($(wildcard $(OPENBLAS_HEADERS)),)
+	USE_CBLAS = 0
+    $(info OpenBLAS header not found, compiling without it.)
+else
+    USE_CBLAS = 1
+    $(info OpenBLAS found, enabling support.)
+    CFLAGS += -DUSE_CBLAS -I$(dir $(OPENBLAS_HEADERS))
+    LDFLAGS += -L$(dir $(OPENBLAS_LIBS)) -lopenblas
+endif
+
 TARGET = matmul
 
 all: $(TARGET)
 
 # Build the executable
 $(TARGET): $(OBJ_FILES) $(LIB_FILES)
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 # Build object files from src
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
