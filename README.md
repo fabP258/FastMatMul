@@ -10,6 +10,11 @@ Exploring how to multiply matrices fast.
 | Numpy                         |  250   | 100  |
 | CBLAS (sGEMM)                 |  320   | 100  |
 
+## Compilation
+
+This project uses GNU Make to automate the compilation process. In order to use the full functionality it is required to have *OpenBLAS* installed in `.\lib`. If the library is not available only the parts of the program that do not depend on it will be compiled.
+
+
 ## Run the program
 
 ```shell
