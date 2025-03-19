@@ -40,7 +40,7 @@ def plot():
     fig, ax = plt.subplots()
 
     for algo_idx in range(len(csv_data["columns"])-1):
-        ax.plot(csv_data["data"][0], csv_data["data"][algo_idx+1], label=csv_data["columns"][algo_idx+1])
+        ax.plot(csv_data["data"][0], csv_data["data"][algo_idx+1], label=csv_data["columns"][algo_idx+1], marker='o')
     
     ax.legend()
     fig.savefig("benchmark.png")
