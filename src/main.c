@@ -35,7 +35,7 @@ int main() {
     EMatmulAlgorithm algorithms[NUM_MATMUL_ALGOS] = { NAIVE, OPTIMIZED_LOOP_ORDER };
     const char *algo_header[NUM_MATMUL_ALGOS] = {"Naive", "Optimized_Loop_Order" };
 #endif
-    size_t matrixSizes[4] = { 256U, 512U, 1024U, 1024U };
+    size_t matrixSizes[4] = { 256U, 512U, 1024U, 2048U };
 
     printf("%-15s", "Matrix size N");
     for (size_t i = 0; i < NUM_MATMUL_ALGOS; i++) {
