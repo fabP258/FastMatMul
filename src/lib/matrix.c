@@ -1,21 +1,36 @@
 #include "matrix.h"
+#include <stdio.h>
 
-matrix_t createMatrix(size_t numRows, size_t numCols, DATA_TYPE value) {
+matrix_t createMatrix(size_t numRows, size_t numCols, MatrixDType dtype) {
     matrix_t matrix;
-    initMatrix(&matrix, numRows, numCols, value);
+    initMatrix(&matrix, numRows, numCols, dtype);
     return matrix;
 }
 
-void initMatrix(matrix_t *matrix, size_t numRows, size_t numCols, DATA_TYPE value) {
-    matrix->data = (DATA_TYPE *)malloc(numRows * numCols * sizeof(DATA_TYPE));
+void initMatrix(matrix_t *matrix, size_t numRows, size_t numCols, MatrixDType dtype) {
+    size_t elementSize;
+    switch (dtype) {
+        case DTYPE_INT:
+            elementSize = sizeof(int);
+            break;
+        case DTYPE_FLOAT:
+            elementSize = sizeof(float);
+            break;
+        case DTYPE_DOUBLE:
+            elementSize = sizeof(double);
+            break;
+        default:
+            printf("Error: dtype not allowed.");
+            // TODO: Crash properly
+            break;
+    }
+    matrix->stride = elementSize;
+    matrix->data = malloc(numRows * numCols * elementSize);
     if (matrix->data == NULL) {
         return;
     }
     matrix->numRows = numRows;
     matrix->numCols = numCols;
-    for (size_t i = 0; i < (numRows * numCols); i++) {
-        matrix->data[i] = value;
-    }
 }
 
 void freeMatrix(matrix_t *matrix) {
@@ -26,6 +41,7 @@ void freeMatrix(matrix_t *matrix) {
     matrix->data = NULL;
     matrix->numRows = 0U;
     matrix->numCols = 0U;
+    matrix->stride = 0U;
 }
 
 size_t calculateIndex(matrix_t *matrix, size_t rowIdx, size_t colIdx) {
