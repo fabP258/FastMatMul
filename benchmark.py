@@ -1,24 +1,21 @@
-"""
-TODO:
-- Execute make command to build executable
-- Load csv data
-- Run Numpy benchmark program in Python
-- Plot results (matplotlib)
-"""
-
 import subprocess
+from pathlib import Path
 import matplotlib.pyplot as plt
 
 def build():
-    return None
+    print("Executing build command: make build")
+    result = subprocess.run(["make", "clean"], capture_output=True, text=True)
+    print(result.stdout)
 
 def run():
-    print("Calling Executable to run benchmark ...")
-    result = subprocess.run(["matmul.exe"], capture_output=True, text=True)
+    print("Executing program")
+    result = subprocess.run(["make", "run"], capture_output=True, text=True)
     print(result.stdout)
 
 def plot():
-    # TODO: check if results exists
+    if not Path("results.csv").is_file():
+        print("ERROR: results.csv file not available.")
+        return
     csv_data = {}
     with open("results.csv", "r") as f:
         for i, line in enumerate(f):
@@ -33,9 +30,6 @@ def plot():
                 if col_idx == 0:
                     dividend = 1
                 csv_data["data"][col_idx].append(float(val) / dividend)
-    
-    print(csv_data["columns"])
-    print(csv_data["data"])
 
     fig, ax = plt.subplots()
 
@@ -50,8 +44,6 @@ def main():
     run()
     # TODO: run Numpy benchmark here
     plot()
-    
-    return None
 
 if __name__ == "__main__":
     main()
