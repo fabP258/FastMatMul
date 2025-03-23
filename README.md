@@ -26,3 +26,9 @@ $ make run
 ```shell
 $ make test
 ```
+
+## Benchmarking
+The Python file `benchmark.py` encapsulates building the benchmarking program and plotting the data.
+```shell
+$ python benchmark.py
+```
