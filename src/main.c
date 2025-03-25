@@ -56,8 +56,8 @@ int main() {
 
     matrix_t A, B;
     for (size_t i = 0; i < 8; i++) {
-        A = createMatrix(matrixSizes[i], matrixSizes[i], (DATA_TYPE)1);
-        B = createMatrix(matrixSizes[i], matrixSizes[i], (DATA_TYPE)2);
+        A = createMatrix(matrixSizes[i], matrixSizes[i], DTYPE_INT);
+        B = createMatrix(matrixSizes[i], matrixSizes[i], DTYPE_INT);
         if ((A.data == NULL) || (B.data == NULL)) {
             printf("Failed to create matrix.");
             return -1;
