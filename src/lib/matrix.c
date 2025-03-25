@@ -24,7 +24,6 @@ void initMatrix(matrix_t *matrix, size_t numRows, size_t numCols, MatrixDType dt
             // TODO: Crash properly
             break;
     }
-    matrix->stride = elementSize;
     matrix->data = malloc(numRows * numCols * elementSize);
     if (matrix->data == NULL) {
         return;
@@ -41,7 +40,6 @@ void freeMatrix(matrix_t *matrix) {
     matrix->data = NULL;
     matrix->numRows = 0U;
     matrix->numCols = 0U;
-    matrix->stride = 0U;
 }
 
 size_t calculateIndex(matrix_t *matrix, size_t rowIdx, size_t colIdx) {

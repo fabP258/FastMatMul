@@ -14,7 +14,6 @@ typedef struct {
     void *data;
     size_t numRows;
     size_t numCols;
-    size_t stride;
     MatrixDType dtype;
 } matrix_t;
 

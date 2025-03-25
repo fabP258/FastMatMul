@@ -12,21 +12,20 @@ typedef enum {
 
 matrix_t matmul(matrix_t *A, matrix_t *B, EMatmulAlgorithm algorithm);
 
+typedef void (*MatmulFunc)(matrix_t *, matrix_t *, matrix_t *);
+
 void matmulNaive(matrix_t *A, matrix_t *B, matrix_t *result);
 void matmulNaiveInt(matrix_t *A, matrix_t *B, matrix_t *result);
 void matmulNaiveFloat(matrix_t *A, matrix_t *B, matrix_t *result);
 void matmulNaiveDouble(matrix_t *A, matrix_t *B, matrix_t *result);
-typedef void (*MatmulNaiveFunc)(matrix_t *, matrix_t *, matrix_t*);
-extern MatmulNaiveFunc matmulNaiveFuncTable[];
+extern MatmulFunc matmulNaiveFuncTable[];
 
 void matmulLoopOrderOptimized(matrix_t *A, matrix_t *B, matrix_t *result);
 void matmulLoopOrderOptimizedInt(matrix_t *A, matrix_t *B, matrix_t *result);
 void matmulLoopOrderOptimizedFloat(matrix_t *A, matrix_t *B, matrix_t *result);
 void matmulLoopOrderOptimizedDouble(matrix_t *A, matrix_t *B, matrix_t *result);
-typedef void (*MatmulLoopOrderOptimizedFunc)(matrix_t *, matrix_t *, matrix_t*);
-extern MatmulLoopOrderOptimizedFunc matmulLoopOrderOptimizedFuncTable[];
+extern MatmulFunc matmulLoopOrderOptimizedFuncTable[];
 
 #ifdef USE_CBLAS
-// TODO: dispatch dtype properly
 void matmulBlas(matrix_t *A, matrix_t *B, matrix_t *result);
 #endif

@@ -6,11 +6,12 @@
 
 matrix_t matmul(matrix_t *A, matrix_t *B, EMatmulAlgorithm algorithm) {
     matrix_t result;
-    if (A->data == NULL || B->data == NULL || (A->numCols != B->numRows)) {
+    if (A->data == NULL || B->data == NULL || (A->numCols != B->numRows) || (A->dtype != B->dtype)) {
         result.data = NULL;
+        // TODO: Handle error properly
         return result;
     }
-    initMatrix(&result, A->numRows, B->numCols, (DATA_TYPE)0);
+    initMatrix(&result, A->numRows, B->numCols, A->dtype);
     if (result.data == NULL) {
         return result;
     }
@@ -34,14 +35,14 @@ matrix_t matmul(matrix_t *A, matrix_t *B, EMatmulAlgorithm algorithm) {
     return result;
 }
 
-MatmulNaiveFunc matmulNaiveFuncTable[] = {
-    matmulNaiveInt, // DTYPE_INT
+MatmulFunc matmulNaiveFuncTable[] = {
+    matmulNaiveInt,   // DTYPE_INT
     matmulNaiveFloat, // DTYPE_FLOAT
     matmulNaiveDouble // DTYPE_DOUBLE
 };
 
 void matmulNaive(matrix_t *A, matrix_t *B, matrix_t *result) {
-    MatmulNaiveFunc func =  matmulNaiveFuncTable[A->dtype];
+    MatmulFunc func =  matmulNaiveFuncTable[A->dtype];
     func(A, B, result);
 }
 
@@ -93,14 +94,14 @@ void matmulNaiveDouble(matrix_t *A, matrix_t *B, matrix_t *result) {
     }
 }
 
-MatmulLoopOrderOptimizedFunc matmulLoopOrderOptimizedFuncTable[] = {
-    matmulLoopOrderOptimizedInt, // DTYPE_INT
+MatmulFunc matmulLoopOrderOptimizedFuncTable[] = {
+    matmulLoopOrderOptimizedInt,   // DTYPE_INT
     matmulLoopOrderOptimizedFloat, // DTYPE_FLOAT
     matmulLoopOrderOptimizedDouble // DTYPE_DOUBLE
 };
 
 void matmulLoopOrderOptimized(matrix_t *A, matrix_t *B, matrix_t *result) {
-    MatmulLoopOrderOptimizedFunc func = matmulLoopOrderOptimizedFuncTable[A->dtype];
+    MatmulFunc func = matmulLoopOrderOptimizedFuncTable[A->dtype];
     func(A, B, result);
 }
 
@@ -145,8 +146,20 @@ void matmulLoopOrderOptimizedDouble(matrix_t *A, matrix_t *B, matrix_t *result) 
 
 #ifdef USE_CBLAS
 void matmulBlas(matrix_t *A, matrix_t *B, matrix_t *result) {
-    // TODO: Handle dtypes properly, this only works for float
     openblas_set_num_threads(4);
-    cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, A->numRows, B->numCols, A->numCols, 1.0f, A->data, A->numCols, B->data, B->numCols, 0.0f, result->data, result->numCols);
+    switch (A->dtype) {
+        case DTYPE_INT:
+            matmulLoopOrderOptimized(A, B, result);
+            break;
+        case DTYPE_FLOAT:
+            cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, A->numRows, B->numCols, A->numCols, 1.0f, (float *)A->data, A->numCols, (float *)B->data, B->numCols, 0.0f, (float *)result->data, result->numCols);
+            break;
+        case DTYPE_DOUBLE:
+            cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, A->numRows, B->numCols, A->numCols, 1.0f, (double *)A->data, A->numCols, (double *)B->data, B->numCols, 0.0f, (double *)result->data, result->numCols);
+            break;
+        default:
+            // TODO: Handle error properly
+            return;
+    }
 }
 #endif
