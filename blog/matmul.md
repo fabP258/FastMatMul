@@ -50,13 +50,13 @@ Now we need to address the second drawback of the naive matrix representation, w
 ```C
 matrix_t createMatrix(size_t numRows, size_t numCols) {
     matrix_t matrix;
-    matrix.data = malloc(numRows * numCols * sizeof(float));
+    matrix.data = calloc(numRows * numCols, sizeof(float));
     matrix.numRows = numRows;
     matrix.numCols = numCols;
     return matrix;
 }
 ```
-By using the system call `malloc` the function requests the allocation of the number of bytes required for representing a matrix with $numRows * numCols$ elements of type float. Since this allocates memory on the heap we also need to free the memory manually if the object is not needed anymore. This can be done by calling the following function.
+By using the system call `calloc` the function requests the allocation of the number of bytes required for representing a matrix with $numRows * numCols$ elements of type float. Using `calloc` instead of `malloc` ensures that all bytes are initialized with zeros. Since this allocates memory on the heap we also need to free the memory manually if the object is not needed anymore. This can be done by calling the following function.
 
 ```C
 void freeMatrix(matrix_t *matrix) {
@@ -111,14 +111,28 @@ matrix_t createMatrix(size_t numRows, size_t numCols, MatrixDType dtype) {
       // TODO: Assert here?
       return matrix;
   }
-  matrix->data = malloc(numRows * numCols * elementSize);
+  matrix->data = calloc(numRows * numCols, elementSize);
   if (matrix->data == NULL) {
     return matrix;
   }
   matrix->numRows = numRows;
   matrix->numCols = numCols;
+  matrix->dtype = dtype;
   return matrix;
 }
 ```
 
-Recall that the `sizeof()` function used here returns the number of bytes that are required to store a specific type. Finally we are able to represent matrices of different data types. But this also comes at a cost. Accessing an element of a matrix requires now to cast the void pointer first to a pointer of the respective data type. We will revisit this issues once we implement the matrix multiplication.
+Recall that the `sizeof()` function used here returns the number of bytes that are required to store a specific type. Finally we are able to represent matrices of different data types. But this also comes at a cost. Accessing an element of a matrix requires now to cast the void pointer first to a pointer of the respective data type and calculating the index int the flattened array. This can be seen in the example below for a matrix object having data type float.
+
+```C
+// create a matrix
+matrix_t matrix = createMatrix(2U, 3U, DTYPE_FLOAT);
+
+// set element (1,2) of the matrix
+((float *)matrix.data)[1 * matrix.numCols + 2] = 0.1f;
+```
+Since accessing elements of the matrix is a quite common use case and the operations required are prone to error it makes sense to abstract it into a function.
+```C
+// TODO: Setter and getter
+```
+We will revisit this issue once we implement the matrix multiplication.

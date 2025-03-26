@@ -25,7 +25,7 @@ void initMatrix(matrix_t *matrix, size_t numRows, size_t numCols, MatrixDType dt
             exit(1);
             break;
     }
-    matrix->data = malloc(numRows * numCols * elementSize);
+    matrix->data = calloc(numRows * numCols, elementSize);
     if (matrix->data == NULL) {
         return;
     }

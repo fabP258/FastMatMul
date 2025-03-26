@@ -8,11 +8,12 @@ matrix_t matmul(matrix_t *A, matrix_t *B, EMatmulAlgorithm algorithm) {
     matrix_t result;
     if (A->data == NULL || B->data == NULL || (A->numCols != B->numRows) || (A->dtype != B->dtype)) {
         result.data = NULL;
-        // TODO: Handle error properly
+        // TODO: Report error properly to caller
         return result;
     }
     initMatrix(&result, A->numRows, B->numCols, A->dtype);
     if (result.data == NULL) {
+        // TODO: Report error properly to caller
         return result;
     }
     switch (algorithm) {
@@ -28,9 +29,8 @@ matrix_t matmul(matrix_t *A, matrix_t *B, EMatmulAlgorithm algorithm) {
             break;
 #endif
         default:
-            // TODO: catch this error
-            freeMatrix(&result);
-            break;
+            fprintf(stderr, "Unsupported algorithm.");
+            exit(1);
     }
     return result;
 }
@@ -158,8 +158,8 @@ void matmulBlas(matrix_t *A, matrix_t *B, matrix_t *result) {
             cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, A->numRows, B->numCols, A->numCols, 1.0f, (double *)A->data, A->numCols, (double *)B->data, B->numCols, 0.0f, (double *)result->data, result->numCols);
             break;
         default:
-            // TODO: Handle error properly
-            return;
+            fprintf(stderr, "Unsupported dtype.");
+            exit(1);
     }
 }
 #endif
