@@ -11,8 +11,20 @@ typedef enum {
 } EMatmulAlgorithm;
 
 matrix_t matmul(matrix_t *A, matrix_t *B, EMatmulAlgorithm algorithm);
+
+typedef void (*MatmulFunc)(matrix_t *, matrix_t *, matrix_t *);
+
 void matmulNaive(matrix_t *A, matrix_t *B, matrix_t *result);
+void matmulNaiveInt(matrix_t *A, matrix_t *B, matrix_t *result);
+void matmulNaiveFloat(matrix_t *A, matrix_t *B, matrix_t *result);
+void matmulNaiveDouble(matrix_t *A, matrix_t *B, matrix_t *result);
+extern MatmulFunc matmulNaiveFuncTable[];
+
 void matmulLoopOrderOptimized(matrix_t *A, matrix_t *B, matrix_t *result);
+void matmulLoopOrderOptimizedInt(matrix_t *A, matrix_t *B, matrix_t *result);
+void matmulLoopOrderOptimizedFloat(matrix_t *A, matrix_t *B, matrix_t *result);
+void matmulLoopOrderOptimizedDouble(matrix_t *A, matrix_t *B, matrix_t *result);
+extern MatmulFunc matmulLoopOrderOptimizedFuncTable[];
 
 #ifdef USE_CBLAS
 void matmulBlas(matrix_t *A, matrix_t *B, matrix_t *result);

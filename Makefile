@@ -54,7 +54,7 @@ $(BUILD_DIR)/%.o: $(TEST_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 test: $(TEST_OBJ_FILES) $(LIB_OBJ)
-	$(CC) $(CFLAGS) -o test $^
+	$(CC) $(CFLAGS) -o test $^ $(LDFLAGS)
 	./test
 
 # Clean up
