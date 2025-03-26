@@ -35,8 +35,9 @@ def plot():
 
     for algo_idx in range(len(csv_data["columns"])-1):
         ax.plot(csv_data["data"][0], csv_data["data"][algo_idx+1], label=csv_data["columns"][algo_idx+1], marker='o')
-    
     ax.legend()
+    ax.set_xlabel("matrix size (M=N=K)")
+    ax.set_ylabel("GxOP/s")
     fig.savefig("benchmark.png")
 
 def main():
