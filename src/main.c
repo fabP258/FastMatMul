@@ -3,7 +3,7 @@
 #include "matrix.h"
 #include "linalg.h"
 
-#ifdef USE_CBLAS
+#ifdef CBLAS_AVAILABLE
 #define NUM_MATMUL_ALGOS 3
 #else
 #define NUM_MATMUL_ALGOS 2
@@ -29,7 +29,7 @@ double evaluateMatmulAlgorithmFlops(matrix_t *A, matrix_t *B, EMatmulAlgorithm a
 }
 
 int main() {
-#ifdef USE_CBLAS
+#ifdef CBLAS_AVAILABLE
     EMatmulAlgorithm algorithms[NUM_MATMUL_ALGOS] = { NAIVE, OPTIMIZED_LOOP_ORDER, BLAS_GEMM };
     const char *algo_header[NUM_MATMUL_ALGOS] = {"Naive", "Optimized_Loop_Order", "BLAS_GEMM" };
 #else 

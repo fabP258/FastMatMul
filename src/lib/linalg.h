@@ -5,7 +5,7 @@
 typedef enum {
     NAIVE,
     OPTIMIZED_LOOP_ORDER,
-#ifdef USE_CBLAS
+#ifdef CBLAS_AVAILABLE
     BLAS_GEMM
 #endif
 } EMatmulAlgorithm;
@@ -26,6 +26,6 @@ void matmulLoopOrderOptimizedFloat(matrix_t *A, matrix_t *B, matrix_t *result);
 void matmulLoopOrderOptimizedDouble(matrix_t *A, matrix_t *B, matrix_t *result);
 extern MatmulFunc matmulLoopOrderOptimizedFuncTable[];
 
-#ifdef USE_CBLAS
+#ifdef CBLAS_AVAILABLE
 void matmulBlas(matrix_t *A, matrix_t *B, matrix_t *result);
 #endif
