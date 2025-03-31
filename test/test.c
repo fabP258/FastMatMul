@@ -47,6 +47,6 @@ void printMatrix(matrix_t *matrix) {
 }
 
 int main() {
-    testMatmul();
+    testLinalg();
     return 0;
 }

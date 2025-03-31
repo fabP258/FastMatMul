@@ -5,6 +5,7 @@
 #define NUM_DTYPES 3
 #define EPS 1e-6
 
+void testLinalg();
 void testMatmul();
 
 #endif

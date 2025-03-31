@@ -5,6 +5,10 @@
 #include "matrix.h"
 #include "linalg.h"
 
+void testLinalg() {
+    testMatmul();
+}
+
 void testMatmul() {
     matrix_t A = createMatrix(3U, 4U, DTYPE_INT);
     assert(A.data != NULL);
