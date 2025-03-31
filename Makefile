@@ -18,15 +18,15 @@ TEST_OBJ_FILES = $(TEST_FILES:$(TEST_DIR)/%.c=$(BUILD_DIR)/%.o)
 OPENBLAS_LIBS := $(firstword $(wildcard lib/*/lib/libopenblas.a))
 OPENBLAS_HEADERS := $(firstword $(wildcard lib/*/include/cblas.h))
 ifeq ($(wildcard $(OPENBLAS_LIBS)),)
-    USE_CBLAS = 0
+    CBLAS_AVAILABLE = 0
     $(info OpenBLAS lib not found, compiling without it.)
 else ifeq ($(wildcard $(OPENBLAS_HEADERS)),)
-	USE_CBLAS = 0
+	CBLAS_AVAILABLE = 0
     $(info OpenBLAS header not found, compiling without it.)
 else
-    USE_CBLAS = 1
+    CBLAS_AVAILABLE = 1
     $(info OpenBLAS found, enabling support.)
-    CFLAGS += -DUSE_CBLAS -I$(dir $(OPENBLAS_HEADERS))
+    CFLAGS += -DCBLAS_AVAILABLE -I$(dir $(OPENBLAS_HEADERS))
     LDFLAGS += -L$(dir $(OPENBLAS_LIBS)) -lopenblas
 endif
 
