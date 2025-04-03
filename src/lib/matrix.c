@@ -31,6 +31,8 @@ void initMatrix(matrix_t *matrix, size_t numRows, size_t numCols, MatrixDType dt
     }
     matrix->numRows = numRows;
     matrix->numCols = numCols;
+    matrix->strides[0] = numCols * elementSize;
+    matrix->strides[1] = elementSize;
     matrix->dtype = dtype;
 }
 
@@ -42,6 +44,8 @@ void freeMatrix(matrix_t *matrix) {
     matrix->data = NULL;
     matrix->numRows = 0U;
     matrix->numCols = 0U;
+    matrix->strides[0] = 0U;
+    matrix->strides[1] = 0U;
 }
 
 void castMatrixTo(matrix_t *srcMatrix, MatrixDType dstDtype) {
@@ -152,8 +156,4 @@ void castDoubleMatrixToFloatMatrix(matrix_t *srcMatrix, matrix_t *dstMatrix) {
     for (size_t i = 0; i < numElements; i++) {
         ((float *)dstMatrix->data)[i] = (float)((double *)(srcMatrix->data))[i];
     }
-}
-
-size_t calculateIndex(matrix_t *matrix, size_t rowIdx, size_t colIdx) {
-    return rowIdx * matrix->numCols + colIdx;
 }

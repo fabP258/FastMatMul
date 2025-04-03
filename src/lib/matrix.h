@@ -14,6 +14,7 @@ typedef struct {
     void *data;
     size_t numRows;
     size_t numCols;
+    size_t strides[2];
     MatrixDType dtype;
 } matrix_t;
 
@@ -31,4 +32,6 @@ void castDoubleMatrixToIntMatrix(matrix_t *srcMatrix, matrix_t *dstMatrix);
 void castDoubleMatrixToFloatMatrix(matrix_t *srcMatrix, matrix_t *dstMatrix);
 
 // helper
-size_t calculateIndex(matrix_t *matrix, size_t rowIdx, size_t colIdx);
+static inline size_t calculateIndex(matrix_t *matrix, size_t rowIdx, size_t colIdx) {
+    return rowIdx * matrix->numCols + colIdx;
+}

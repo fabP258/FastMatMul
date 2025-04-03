@@ -47,17 +47,25 @@ void matmulNaive(matrix_t *A, matrix_t *B, matrix_t *result) {
 }
 
 void matmulNaiveInt(matrix_t *A, matrix_t *B, matrix_t *result) {
-    int *aData = (int *)A->data;
-    int *bData = (int *)B->data;
-    int *resData = (int *)result->data;
-    int temp = 0;
+    char *aData = (char *)A->data;
+    char *bData = (char *)B->data;
+    char *resData = (char *)result->data;
+    size_t aStrides[2] = { A->strides[0], A->strides[1] };
+    size_t bStrides[2] = { B->strides[0], B->strides[1] };
+    size_t resStrides[2] = { result->strides[0], result->strides[1] };
     for (size_t i = 0; i < A->numRows; i++) {
+        size_t resIdx = i * resStrides[0];
         for (size_t j = 0; j < B->numCols; j++) {
-            temp = 0;
+            int temp = 0;
+            size_t aIdx = i * aStrides[0];
+            size_t bIdx = j * bStrides[1];
             for (size_t k = 0; k < A->numCols; k++) {
-                temp += aData[i * A->numCols + k] * bData[k * B->numCols + j];
+                temp += *((int *)(aData + aIdx)) * *((int *)(bData + bIdx));
+                aIdx += aStrides[1];
+                bIdx += bStrides[0];
             }
-            resData[i * result->numCols + j] = temp;
+            *((int *)(resData + resIdx)) = temp;
+            resIdx += resStrides[1];
         }
     }
 }
