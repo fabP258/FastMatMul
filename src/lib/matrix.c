@@ -100,8 +100,11 @@ void castMatrixTo(matrix_t *srcMatrix, MatrixDType dstDtype) {
             exit(1);
     }
     free(srcMatrix->data);
+    // transfer ownership to src
     srcMatrix->data = dstMatrix.data;
     srcMatrix->dtype = dstDtype;
+    srcMatrix->strides[0] = dstMatrix.strides[0];
+    srcMatrix->strides[1] = dstMatrix.strides[1];
 }
 
 void castIntMatrixToFloatMatrix(matrix_t *srcMatrix, matrix_t *dstMatrix) {
