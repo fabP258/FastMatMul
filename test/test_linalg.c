@@ -113,8 +113,6 @@ void testTranspose() {
     mData[calculateIndex(matrix, 1u, 1u)] = 3;
     mData[calculateIndex(matrix, 1u, 2u)] = 8;
 
-    printMatrix(matrix);
-
     matrix_t *expectedResult = createMatrix(3U, 2U, DTYPE_INT);
     assert(expectedResult != NULL);
     int *expData = (int *)expectedResult->data;
@@ -127,12 +125,9 @@ void testTranspose() {
     expData[calculateIndex(expectedResult, 2u, 0u)] = 9;
     expData[calculateIndex(expectedResult, 2u, 1u)] = 8;
 
-    printMatrix(expectedResult);
-
     matrix_t *transposedMatrix = transpose(matrix);
     assert(transposedMatrix != NULL);
 
-    printMatrix(transposedMatrix);
     assert(matrix->numRows == transposedMatrix->numCols);
     assert(matrix->numCols == transposedMatrix->numRows);
     assert(matrix->strides[0] == transposedMatrix->strides[1]);
