@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "matrix.h"
 #include "test_linalg.h"
+#include "test_matrix.h"
 
 void printIntMatrix(matrix_t *matrix) {
     for (int i = 0; i < matrix->numRows; i++) {
@@ -47,6 +48,7 @@ void printMatrix(matrix_t *matrix) {
 }
 
 int main() {
+    testMatrix();
     testLinalg();
     return 0;
 }

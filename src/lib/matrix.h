@@ -10,12 +10,15 @@ typedef enum {
     DTYPE_DOUBLE,
 } MatrixDType;
 
-typedef struct {
+typedef struct matrix {
     void *data;
     size_t numRows;
     size_t numCols;
     size_t strides[2];
     MatrixDType dtype;
+    size_t refcount;
+    struct matrix *base;
+    int ownsData;
 } matrix_t;
 
 matrix_t createMatrix(size_t numRows, size_t numCols, MatrixDType dtype);

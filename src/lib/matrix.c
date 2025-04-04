@@ -34,18 +34,26 @@ void initMatrix(matrix_t *matrix, size_t numRows, size_t numCols, MatrixDType dt
     matrix->strides[0] = numCols;
     matrix->strides[1] = 1u;
     matrix->dtype = dtype;
+    matrix->refcount = 1;
+    matrix->base = NULL;
+    matrix->ownsData = 1;
 }
 
 void freeMatrix(matrix_t *matrix) {
-    if (matrix->data == NULL) {
-        return;
+    matrix->refcount--;
+    if (matrix->refcount == 0) {
+        if (matrix->ownsData && matrix->data != NULL) {
+            free(matrix->data);
+            matrix->data = NULL;
+            matrix->numRows = 0u;
+            matrix->numCols = 0u;
+            matrix->strides[0] = 0u;
+            matrix->strides[1] = 0u;
+        }
+        if (matrix->base) {
+            freeMatrix(matrix->base);
+        }
     }
-    free(matrix->data);
-    matrix->data = NULL;
-    matrix->numRows = 0U;
-    matrix->numCols = 0U;
-    matrix->strides[0] = 0U;
-    matrix->strides[1] = 0U;
 }
 
 void castMatrixTo(matrix_t *srcMatrix, MatrixDType dstDtype) {
