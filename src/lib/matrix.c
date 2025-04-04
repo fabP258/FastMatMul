@@ -2,9 +2,12 @@
 #include <stdio.h>
 #include <assert.h>
 
-matrix_t createMatrix(size_t numRows, size_t numCols, MatrixDType dtype) {
-    matrix_t matrix;
-    initMatrix(&matrix, numRows, numCols, dtype);
+matrix_t *createMatrix(size_t numRows, size_t numCols, MatrixDType dtype) {
+    matrix_t *matrix = (matrix_t *)malloc(sizeof(matrix_t));
+    if (!matrix) {
+        return NULL;
+    }
+    initMatrix(matrix, numRows, numCols, dtype);
     return matrix;
 }
 
@@ -39,6 +42,19 @@ void initMatrix(matrix_t *matrix, size_t numRows, size_t numCols, MatrixDType dt
     matrix->ownsData = 1;
 }
 
+matrix_t *createView(matrix_t *const matrix) {
+    matrix_t *view = (matrix_t *)malloc(sizeof(matrix_t));
+    if (!view) {
+        return NULL;
+    }
+    *view = *matrix;
+    view->refcount = 1u;
+    view->base = matrix;
+    view->ownsData = 0;
+    matrix->refcount++;
+    return view;
+}
+
 void freeMatrix(matrix_t *matrix) {
     matrix->refcount--;
     if (matrix->refcount == 0) {
@@ -53,6 +69,7 @@ void freeMatrix(matrix_t *matrix) {
         if (matrix->base) {
             freeMatrix(matrix->base);
         }
+        free(matrix);
     }
 }
 
@@ -61,16 +78,17 @@ void castMatrixTo(matrix_t *srcMatrix, MatrixDType dstDtype) {
     if (srcMatrix->dtype == dstDtype) {
         return;
     }
-    matrix_t dstMatrix = createMatrix(srcMatrix->numRows, srcMatrix->numCols, dstDtype);
-    assert(dstMatrix.data != NULL);
+    matrix_t *dstMatrix = createMatrix(srcMatrix->numRows, srcMatrix->numCols, dstDtype);
+    assert(dstMatrix != NULL);
+    assert(dstMatrix->data != NULL);
     switch (srcMatrix->dtype) {
         case (DTYPE_INT):
             switch (dstDtype) {
                 case (DTYPE_FLOAT):
-                    castIntMatrixToFloatMatrix(srcMatrix, &dstMatrix);
+                    castIntMatrixToFloatMatrix(srcMatrix, dstMatrix);
                     break;
                 case (DTYPE_DOUBLE):
-                    castIntMatrixToDoubleMatrix(srcMatrix, &dstMatrix);
+                    castIntMatrixToDoubleMatrix(srcMatrix, dstMatrix);
                     break;
                 default:
                     fprintf(stderr, "Unsupported destination dtype for source dtype int.");
@@ -80,10 +98,10 @@ void castMatrixTo(matrix_t *srcMatrix, MatrixDType dstDtype) {
         case (DTYPE_FLOAT):
             switch (dstDtype) {
                 case (DTYPE_INT):
-                    castFloatMatrixToIntMatrix(srcMatrix, &dstMatrix);
+                    castFloatMatrixToIntMatrix(srcMatrix, dstMatrix);
                     break;
                 case (DTYPE_DOUBLE):
-                    castFloatMatrixToDoubleMatrix(srcMatrix, &dstMatrix);
+                    castFloatMatrixToDoubleMatrix(srcMatrix, dstMatrix);
                     break;
                 default:
                     fprintf(stderr, "Unsupported destination dtype for source dtype float.");
@@ -93,10 +111,10 @@ void castMatrixTo(matrix_t *srcMatrix, MatrixDType dstDtype) {
         case (DTYPE_DOUBLE):
             switch (dstDtype) {
                 case (DTYPE_INT):
-                    castDoubleMatrixToIntMatrix(srcMatrix, &dstMatrix);
+                    castDoubleMatrixToIntMatrix(srcMatrix, dstMatrix);
                     break;
                 case (DTYPE_FLOAT):
-                    castDoubleMatrixToFloatMatrix(srcMatrix, &dstMatrix);
+                    castDoubleMatrixToFloatMatrix(srcMatrix, dstMatrix);
                     break;
                 default:
                     fprintf(stderr, "Unsupported destination dtype for source dtype double.");
@@ -109,8 +127,9 @@ void castMatrixTo(matrix_t *srcMatrix, MatrixDType dstDtype) {
     }
     free(srcMatrix->data);
     // transfer ownership to src
-    srcMatrix->data = dstMatrix.data;
+    srcMatrix->data = dstMatrix->data;
     srcMatrix->dtype = dstDtype;
+    free(dstMatrix);
 }
 
 void castIntMatrixToFloatMatrix(matrix_t *srcMatrix, matrix_t *dstMatrix) {

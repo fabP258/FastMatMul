@@ -21,7 +21,8 @@ typedef struct matrix {
     int ownsData;
 } matrix_t;
 
-matrix_t createMatrix(size_t numRows, size_t numCols, MatrixDType dtype);
+matrix_t *createMatrix(size_t numRows, size_t numCols, MatrixDType dtype);
+matrix_t *createView(matrix_t *const matrix);
 void initMatrix(matrix_t *matrix, size_t numRows, size_t numCols, MatrixDType dtype);
 void freeMatrix(matrix_t *matrix);
 

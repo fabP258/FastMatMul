@@ -4,28 +4,27 @@
 #include <cblas.h>
 #endif
 
-matrix_t matmul(matrix_t *A, matrix_t *B, EMatmulAlgorithm algorithm) {
-    matrix_t result;
+matrix_t *matmul(matrix_t *A, matrix_t *B, EMatmulAlgorithm algorithm) {
     if (A->data == NULL || B->data == NULL || (A->numCols != B->numRows) || (A->dtype != B->dtype)) {
-        result.data = NULL;
-        // TODO: Report error properly to caller
-        return result;
+        return NULL;
     }
-    initMatrix(&result, A->numRows, B->numCols, A->dtype);
-    if (result.data == NULL) {
-        // TODO: Report error properly to caller
-        return result;
+    matrix_t *result = createMatrix(A->numRows, B->numCols, A->dtype);
+    if (!result) {
+        return NULL;
+    } 
+    if (result->data == NULL) {
+        return NULL;
     }
     switch (algorithm) {
         case NAIVE:
-            matmulNaive(A,B,&result);
+            matmulNaive(A,B,result);
             break;
         case OPTIMIZED_LOOP_ORDER:
-            matmulLoopOrderOptimized(A,B,&result);
+            matmulLoopOrderOptimized(A,B,result);
             break;
 #ifdef CBLAS_AVAILABLE
         case BLAS_GEMM:
-            matmulBlas(A,B,&result);
+            matmulBlas(A,B,result);
             break;
 #endif
         default:
@@ -182,6 +181,7 @@ void matmulLoopOrderOptimizedDouble(matrix_t *A, matrix_t *B, matrix_t *result) 
 
 #ifdef CBLAS_AVAILABLE
 void matmulBlas(matrix_t *A, matrix_t *B, matrix_t *result) {
+    // TODO: Use strides in function calls
     openblas_set_num_threads(4);
     switch (A->dtype) {
         case DTYPE_INT:
@@ -199,3 +199,15 @@ void matmulBlas(matrix_t *A, matrix_t *B, matrix_t *result) {
     }
 }
 #endif
+
+matrix_t *transpose(matrix_t *matrix) {
+    matrix_t *view = createView(matrix);
+    if (!view) {
+        return NULL;
+    }
+    view->numRows = matrix->numCols;
+    view->numCols = matrix->numRows;
+    view->strides[0] = view->strides[1];
+    view->strides[1] = view->strides[0];
+    return view;
+}

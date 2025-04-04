@@ -10,13 +10,15 @@ void testLinalg() {
 }
 
 void testMatmul() {
-    matrix_t A = createMatrix(3U, 4U, DTYPE_INT);
-    assert(A.data != NULL);
-    matrix_t B = createMatrix(4U, 5U, DTYPE_INT);
-    assert(B.data != NULL);
+    matrix_t *A = createMatrix(3U, 4U, DTYPE_INT);
+    assert(A != NULL);
+    assert(A->data != NULL);
+    matrix_t *B = createMatrix(4U, 5U, DTYPE_INT);
+    assert(B != NULL);
+    assert(B->data != NULL);
 
     // Fill with dummy values
-    int *aData = (int *)A.data;
+    int *aData = (int *)A->data;
     aData[0] = 4;
     aData[1] = 2;
     aData[2] = 4;
@@ -32,7 +34,7 @@ void testMatmul() {
     aData[10] = 2;
     aData[11] = 1;
 
-    int *bData = (int *)B.data;
+    int *bData = (int *)B->data;
     bData[0] = 4;
     bData[1] = 2;
     bData[2] = 2;
@@ -55,10 +57,11 @@ void testMatmul() {
     bData[19] = 4;
 
     // Expected matrix
-    matrix_t expectedResult = createMatrix(3U, 5U, DTYPE_INT);
-    assert(expectedResult.data != NULL);
+    matrix_t *expectedResult = createMatrix(3U, 5U, DTYPE_INT);
+    assert(expectedResult != NULL);
+    assert(expectedResult->data != NULL);
 
-    int *expResData = (int *)expectedResult.data;
+    int *expResData = (int *)expectedResult->data;
     expResData[0] = 22;
     expResData[1] = 20;
     expResData[2] = 22;
@@ -79,19 +82,20 @@ void testMatmul() {
     EMatmulAlgorithm algorithms[NUM_ALGORITHMS] = { NAIVE, OPTIMIZED_LOOP_ORDER, BLAS_GEMM };
     MatrixDType dtypes[3] = { DTYPE_INT, DTYPE_FLOAT, DTYPE_DOUBLE };
     
-    matrix_t C;
+    matrix_t *C;
     for (size_t j = 0; j < NUM_DTYPES; j++) {
-        castMatrixTo(&A, j);
-        castMatrixTo(&B, j);
-        castMatrixTo(&expectedResult, j);
+        castMatrixTo(A, j);
+        castMatrixTo(B, j);
+        castMatrixTo(expectedResult, j);
         for (size_t i = 0; i < NUM_ALGORITHMS; i++) {
-            C = matmul(&A, &B, algorithms[i]);
-            assert(C.data != NULL);
-            assert(testMatrixEquality(&C, &expectedResult, EPS));
+            C = matmul(A, B, algorithms[i]);
+            assert(C != NULL);
+            assert(C->data != NULL);
+            assert(testMatrixEquality(C, expectedResult, EPS));
             printf("[TEST: Matmul with algorithm %d and dtype %d] PASSED\n", algorithms[i], j);
-            freeMatrix(&C);
+            freeMatrix(C);
         }
     }
-    freeMatrix(&A);
-    freeMatrix(&B);
+    freeMatrix(A);
+    freeMatrix(B);
 }
