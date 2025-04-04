@@ -207,7 +207,7 @@ matrix_t *transpose(matrix_t *matrix) {
     }
     view->numRows = matrix->numCols;
     view->numCols = matrix->numRows;
-    view->strides[0] = view->strides[1];
-    view->strides[1] = view->strides[0];
+    view->strides[0] = matrix->strides[1];
+    view->strides[1] = matrix->strides[0];
     return view;
 }

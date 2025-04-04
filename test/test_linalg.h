@@ -7,5 +7,6 @@
 
 void testLinalg();
 void testMatmul();
+void testTranspose();
 
 #endif

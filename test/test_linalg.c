@@ -7,6 +7,7 @@
 
 void testLinalg() {
     testMatmul();
+    testTranspose();
 }
 
 void testMatmul() {
@@ -98,4 +99,44 @@ void testMatmul() {
     }
     freeMatrix(A);
     freeMatrix(B);
+}
+
+void testTranspose() {
+    matrix_t *matrix = createMatrix(2U, 3U, DTYPE_INT);
+    assert(matrix != NULL);
+    int *mData = (int *)matrix->data;
+    mData[calculateIndex(matrix, 0u, 0u)] = 4;
+    mData[calculateIndex(matrix, 0u, 1u)] = 2;
+    mData[calculateIndex(matrix, 0u, 2u)] = 9;
+
+    mData[calculateIndex(matrix, 1u, 0u)] = 1;
+    mData[calculateIndex(matrix, 1u, 1u)] = 3;
+    mData[calculateIndex(matrix, 1u, 2u)] = 8;
+
+    printMatrix(matrix);
+
+    matrix_t *expectedResult = createMatrix(3U, 2U, DTYPE_INT);
+    assert(expectedResult != NULL);
+    int *expData = (int *)expectedResult->data;
+    expData[calculateIndex(expectedResult, 0u, 0u)] = 4;
+    expData[calculateIndex(expectedResult, 0u, 1u)] = 1;
+
+    expData[calculateIndex(expectedResult, 1u, 0u)] = 2;
+    expData[calculateIndex(expectedResult, 1u, 1u)] = 3;
+
+    expData[calculateIndex(expectedResult, 2u, 0u)] = 9;
+    expData[calculateIndex(expectedResult, 2u, 1u)] = 8;
+
+    printMatrix(expectedResult);
+
+    matrix_t *transposedMatrix = transpose(matrix);
+    assert(transposedMatrix != NULL);
+
+    printMatrix(transposedMatrix);
+    assert(matrix->numRows == transposedMatrix->numCols);
+    assert(matrix->numCols == transposedMatrix->numRows);
+    assert(matrix->strides[0] == transposedMatrix->strides[1]);
+    assert(matrix->strides[1] == transposedMatrix->strides[0]);
+    assert(testMatrixEquality(transposedMatrix, expectedResult, EPS));
+    printf("[TEST: testTranspose] PASSED\n");
 }

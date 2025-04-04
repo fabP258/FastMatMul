@@ -72,3 +72,50 @@ int testMatrixEquality(matrix_t *A, matrix_t *B, double eps) {
             exit(1);
     }
 }
+
+void printIntMatrix(matrix_t *matrix) {
+    int *mData = (int *)matrix->data;
+    for (int i = 0; i < matrix->numRows; i++) {
+        for (int j = 0; j < matrix->numCols; j++) {
+            printf("%d ", mData[calculateIndex(matrix, i, j)]);
+        }
+        printf("\n");
+    }
+}
+
+void printFloatMatrix(matrix_t *matrix) {
+    float *mData = (float *)matrix->data;
+    for (int i = 0; i < matrix->numRows; i++) {
+        for (int j = 0; j < matrix->numCols; j++) {
+            printf("%.2f ", mData[calculateIndex(matrix, i, j)]);
+        }
+        printf("\n");
+    }
+}
+
+void printDoubleMatrix(matrix_t *matrix) {
+    double *mData = (double *)matrix->data;
+    for (int i = 0; i < matrix->numRows; i++) {
+        for (int j = 0; j < matrix->numCols; j++) {
+            printf("%.2f ", mData[calculateIndex(matrix, i, j)]);
+        }
+        printf("\n");
+    }
+}
+
+void printMatrix(matrix_t *matrix) {
+    switch (matrix->dtype) {
+        case DTYPE_INT:
+            printIntMatrix(matrix);
+            break;
+        case DTYPE_FLOAT:
+            printFloatMatrix(matrix);
+            break;
+        case DTYPE_DOUBLE:
+            printDoubleMatrix(matrix);
+            break;
+        default:
+            fprintf(stderr, "Unsupported dtype.");
+            exit(1);
+    }
+}
