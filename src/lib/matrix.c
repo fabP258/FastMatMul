@@ -31,8 +31,8 @@ void initMatrix(matrix_t *matrix, size_t numRows, size_t numCols, MatrixDType dt
     }
     matrix->numRows = numRows;
     matrix->numCols = numCols;
-    matrix->strides[0] = numCols * elementSize;
-    matrix->strides[1] = elementSize;
+    matrix->strides[0] = numCols;
+    matrix->strides[1] = 1u;
     matrix->dtype = dtype;
 }
 
@@ -103,8 +103,6 @@ void castMatrixTo(matrix_t *srcMatrix, MatrixDType dstDtype) {
     // transfer ownership to src
     srcMatrix->data = dstMatrix.data;
     srcMatrix->dtype = dstDtype;
-    srcMatrix->strides[0] = dstMatrix.strides[0];
-    srcMatrix->strides[1] = dstMatrix.strides[1];
 }
 
 void castIntMatrixToFloatMatrix(matrix_t *srcMatrix, matrix_t *dstMatrix) {

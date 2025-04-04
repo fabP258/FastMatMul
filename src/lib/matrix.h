@@ -32,6 +32,6 @@ void castDoubleMatrixToIntMatrix(matrix_t *srcMatrix, matrix_t *dstMatrix);
 void castDoubleMatrixToFloatMatrix(matrix_t *srcMatrix, matrix_t *dstMatrix);
 
 // helper
-static inline size_t calculateOffset(matrix_t *matrix, size_t rowIdx, size_t colIdx) {
+static inline size_t calculateIndex(matrix_t *matrix, size_t rowIdx, size_t colIdx) {
     return rowIdx * matrix->strides[0] + colIdx * matrix->strides[1];
 }

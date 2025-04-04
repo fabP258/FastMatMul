@@ -6,11 +6,11 @@ int testMatrixEqualityInt(matrix_t *A, matrix_t *B) {
     if (A->numRows != B->numRows || A->numCols != B->numCols) {
         return 0;
     }
-    char *aData = (char *)A->data;
-    char *bData = (char *)B->data;
+    int *aData = (int *)A->data;
+    int *bData = (int *)B->data;
     for (size_t i = 0; i < A->numRows; i++) {
         for (size_t j = 0; j < A->numCols; j++) {
-            if (!(*((int *)(aData + calculateOffset(A,i,j))) == *((int *)(aData + calculateOffset(B,i,j))))) {
+            if (!(aData[calculateIndex(A,i,j)] == bData[calculateIndex(B,i,j)])) {
                 return 0;
             }
         }
@@ -22,11 +22,11 @@ int testMatrixEqualityFloat(matrix_t *A, matrix_t *B, double eps) {
     if (A->numRows != B->numRows || A->numCols != B->numCols) {
         return 0;
     }
-    char *aData = (char *)A->data;
-    char *bData = (char *)B->data;
+    float *aData = (float *)A->data;
+    float *bData = (float *)B->data;
     for (size_t i = 0; i < A->numRows; i++) {
         for (size_t j = 0; j < A->numCols; j++) {
-            float diff = *((float *)(aData + calculateOffset(A,i,j))) - *((float *)(aData + calculateOffset(B,i,j)));
+            float diff = aData[calculateIndex(A,i,j)] - bData[calculateIndex(B,i,j)];
             if (fabs(diff) > (float)eps) {
                 return 0;
             }
@@ -39,11 +39,11 @@ int testMatrixEqualityDouble(matrix_t *A, matrix_t *B, double eps) {
     if (A->numRows != B->numRows || A->numCols != B->numCols) {
         return 0;
     }
-    char *aData = (char *)A->data;
-    char *bData = (char *)B->data;
+    double *aData = (double *)A->data;
+    double *bData = (double *)B->data;
     for (size_t i = 0; i < A->numRows; i++) {
         for (size_t j = 0; j < A->numCols; j++) {
-            double diff = *((double *)(aData + calculateOffset(A,i,j))) - *((double *)(aData + calculateOffset(B,i,j)));
+            double diff = aData[calculateIndex(A,i,j)] - bData[calculateIndex(B,i,j)];
             if (fabs(diff) > eps) {
                 return 0;
             }
