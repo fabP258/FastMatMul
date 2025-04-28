@@ -10,14 +10,19 @@ typedef enum {
     DTYPE_DOUBLE,
 } MatrixDType;
 
-typedef struct {
+typedef struct matrix {
     void *data;
     size_t numRows;
     size_t numCols;
+    size_t strides[2];
     MatrixDType dtype;
+    size_t refcount;
+    struct matrix *base;
+    int ownsData;
 } matrix_t;
 
-matrix_t createMatrix(size_t numRows, size_t numCols, MatrixDType dtype);
+matrix_t *createMatrix(size_t numRows, size_t numCols, MatrixDType dtype);
+matrix_t *createView(matrix_t *const matrix);
 void initMatrix(matrix_t *matrix, size_t numRows, size_t numCols, MatrixDType dtype);
 void freeMatrix(matrix_t *matrix);
 
@@ -31,4 +36,6 @@ void castDoubleMatrixToIntMatrix(matrix_t *srcMatrix, matrix_t *dstMatrix);
 void castDoubleMatrixToFloatMatrix(matrix_t *srcMatrix, matrix_t *dstMatrix);
 
 // helper
-size_t calculateIndex(matrix_t *matrix, size_t rowIdx, size_t colIdx);
+static inline size_t calculateIndex(matrix_t *matrix, size_t rowIdx, size_t colIdx) {
+    return rowIdx * matrix->strides[0] + colIdx * matrix->strides[1];
+}

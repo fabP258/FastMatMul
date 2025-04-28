@@ -4,28 +4,27 @@
 #include <cblas.h>
 #endif
 
-matrix_t matmul(matrix_t *A, matrix_t *B, EMatmulAlgorithm algorithm) {
-    matrix_t result;
+matrix_t *matmul(matrix_t *A, matrix_t *B, EMatmulAlgorithm algorithm) {
     if (A->data == NULL || B->data == NULL || (A->numCols != B->numRows) || (A->dtype != B->dtype)) {
-        result.data = NULL;
-        // TODO: Report error properly to caller
-        return result;
+        return NULL;
     }
-    initMatrix(&result, A->numRows, B->numCols, A->dtype);
-    if (result.data == NULL) {
-        // TODO: Report error properly to caller
-        return result;
+    matrix_t *result = createMatrix(A->numRows, B->numCols, A->dtype);
+    if (!result) {
+        return NULL;
+    } 
+    if (result->data == NULL) {
+        return NULL;
     }
     switch (algorithm) {
         case NAIVE:
-            matmulNaive(A,B,&result);
+            matmulNaive(A,B,result);
             break;
         case OPTIMIZED_LOOP_ORDER:
-            matmulLoopOrderOptimized(A,B,&result);
+            matmulLoopOrderOptimized(A,B,result);
             break;
 #ifdef CBLAS_AVAILABLE
         case BLAS_GEMM:
-            matmulBlas(A,B,&result);
+            matmulBlas(A,B,result);
             break;
 #endif
         default:
@@ -50,14 +49,22 @@ void matmulNaiveInt(matrix_t *A, matrix_t *B, matrix_t *result) {
     int *aData = (int *)A->data;
     int *bData = (int *)B->data;
     int *resData = (int *)result->data;
-    int temp = 0;
+    size_t aStrides[2] = { A->strides[0], A->strides[1] };
+    size_t bStrides[2] = { B->strides[0], B->strides[1] };
+    size_t resStrides[2] = { result->strides[0], result->strides[1] };
     for (size_t i = 0; i < A->numRows; i++) {
+        size_t resIdx = i * resStrides[0];
         for (size_t j = 0; j < B->numCols; j++) {
-            temp = 0;
+            int temp = 0;
+            size_t aIdx = i * aStrides[0];
+            size_t bIdx = j * bStrides[1];
             for (size_t k = 0; k < A->numCols; k++) {
-                temp += aData[i * A->numCols + k] * bData[k * B->numCols + j];
+                temp += aData[aIdx] * bData[bIdx];
+                aIdx += aStrides[1];
+                bIdx += bStrides[0];
             }
-            resData[i * result->numCols + j] = temp;
+            resData[resIdx] = temp;
+            resIdx += resStrides[1];
         }
     }
 }
@@ -66,14 +73,19 @@ void matmulNaiveFloat(matrix_t *A, matrix_t *B, matrix_t *result) {
     float *aData = (float *)A->data;
     float *bData = (float *)B->data;
     float *resData = (float *)result->data;
-    float temp = 0;
     for (size_t i = 0; i < A->numRows; i++) {
+        size_t resIdx = i * result->strides[0];
         for (size_t j = 0; j < B->numCols; j++) {
-            temp = 0;
+            size_t aIdx = i * A->strides[0];
+            size_t bIdx = j * B->strides[1];
+            float temp = 0;
             for (size_t k = 0; k < A->numCols; k++) {
-                temp += aData[i * A->numCols + k] * bData[k * B->numCols + j];
+                temp += aData[aIdx] * bData[bIdx];
+                aIdx += A->strides[1];
+                bIdx += B->strides[0];
             }
-            resData[i * result->numCols + j] = temp;
+            resData[resIdx] = temp;
+            resIdx += result->strides[1];
         }
     }
 }
@@ -82,14 +94,19 @@ void matmulNaiveDouble(matrix_t *A, matrix_t *B, matrix_t *result) {
     double *aData = (double *)A->data;
     double *bData = (double *)B->data;
     double *resData = (double *)result->data;
-    double temp = 0;
     for (size_t i = 0; i < A->numRows; i++) {
+        size_t resIdx = i * result->strides[0];
         for (size_t j = 0; j < B->numCols; j++) {
-            temp = 0;
+            size_t aIdx = i * A->strides[0];
+            size_t bIdx = j * B->strides[1];
+            double temp = 0;
             for (size_t k = 0; k < A->numCols; k++) {
-                temp += aData[i * A->numCols + k] * bData[k * B->numCols + j];
+                temp += aData[aIdx] * bData[bIdx];
+                aIdx += A->strides[1];
+                bIdx += B->strides[0];
             }
-            resData[i * result->numCols + j] = temp;
+            resData[resIdx] = temp;
+            resIdx += result->strides[1];
         }
     }
 }
@@ -110,10 +127,16 @@ void matmulLoopOrderOptimizedInt(matrix_t *A, matrix_t *B, matrix_t *result) {
     int *bData = (int *)B->data;
     int *resData = (int *)result->data;
     for (size_t i = 0; i < A->numRows; i++) {
+        size_t aIdx = i * A->strides[0];
         for (size_t k = 0; k < A->numCols; k++) {
+            size_t resIdx = i * result->strides[0];
+            size_t bIdx = k * B->strides[0];
             for (size_t j = 0; j < B->numCols; j++) {
-                resData[i * result->numCols+j] += aData[i * A->numCols + k] * bData[k * B->numCols + j];
+                resData[resIdx] += aData[aIdx] * bData[bIdx];
+                resIdx += result->strides[1];
+                bIdx += B->strides[1];
             }
+            aIdx += A->strides[1];
         }
     }
 }
@@ -123,10 +146,16 @@ void matmulLoopOrderOptimizedFloat(matrix_t *A, matrix_t *B, matrix_t *result) {
     float *bData = (float *)B->data;
     float *resData = (float *)result->data;
     for (size_t i = 0; i < A->numRows; i++) {
+        size_t aIdx = i * A->strides[0];
         for (size_t k = 0; k < A->numCols; k++) {
+            size_t resIdx = i * result->strides[0];
+            size_t bIdx = k * B->strides[0];
             for (size_t j = 0; j < B->numCols; j++) {
-                resData[i * result->numCols+j] += aData[i * A->numCols + k] * bData[k * B->numCols + j];
+                resData[resIdx] += aData[aIdx] * bData[bIdx];
+                resIdx += result->strides[1];
+                bIdx += B->strides[1];
             }
+            aIdx += A->strides[1];
         }
     }
 }
@@ -136,10 +165,16 @@ void matmulLoopOrderOptimizedDouble(matrix_t *A, matrix_t *B, matrix_t *result) 
     double *bData = (double *)B->data;
     double *resData = (double *)result->data;
     for (size_t i = 0; i < A->numRows; i++) {
+        size_t aIdx = i * A->strides[0];
         for (size_t k = 0; k < A->numCols; k++) {
+            size_t resIdx = i * result->strides[0];
+            size_t bIdx = k * B->strides[0];
             for (size_t j = 0; j < B->numCols; j++) {
-                resData[i * result->numCols+j] += aData[i * A->numCols + k] * bData[k * B->numCols + j];
+                resData[resIdx] += aData[aIdx] * bData[bIdx];
+                resIdx += result->strides[1];
+                bIdx += B->strides[1];
             }
+            aIdx += A->strides[1];
         }
     }
 }
@@ -163,3 +198,15 @@ void matmulBlas(matrix_t *A, matrix_t *B, matrix_t *result) {
     }
 }
 #endif
+
+matrix_t *transpose(matrix_t *matrix) {
+    matrix_t *view = createView(matrix);
+    if (!view) {
+        return NULL;
+    }
+    view->numRows = matrix->numCols;
+    view->numCols = matrix->numRows;
+    view->strides[0] = matrix->strides[1];
+    view->strides[1] = matrix->strides[0];
+    return view;
+}

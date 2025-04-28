@@ -10,7 +10,8 @@ typedef enum {
 #endif
 } EMatmulAlgorithm;
 
-matrix_t matmul(matrix_t *A, matrix_t *B, EMatmulAlgorithm algorithm);
+// Matrix multiplication
+matrix_t *matmul(matrix_t *A, matrix_t *B, EMatmulAlgorithm algorithm);
 
 typedef void (*MatmulFunc)(matrix_t *, matrix_t *, matrix_t *);
 
@@ -29,3 +30,5 @@ extern MatmulFunc matmulLoopOrderOptimizedFuncTable[];
 #ifdef CBLAS_AVAILABLE
 void matmulBlas(matrix_t *A, matrix_t *B, matrix_t *result);
 #endif
+
+matrix_t *transpose(matrix_t *matrix);

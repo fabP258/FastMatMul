@@ -11,19 +11,19 @@
 #define NUM_DTYPES 3
 
 double evaluateMatmulAlgorithmFlops(matrix_t *A, matrix_t *B, EMatmulAlgorithm algorithm) {
-    matrix_t C;
+    matrix_t *C;
     struct timespec start, end;
 
     double numOps = 2.0 * (double)A->numRows * (double)B->numCols * (double)A->numCols;
     clock_gettime(CLOCK_MONOTONIC, &start);
     C = matmul(A, B, algorithm);
     clock_gettime(CLOCK_MONOTONIC, &end);
-    if (C.data == NULL) {
+    if (C->data == NULL) {
         printf("Algorithm %d: Matmul failed.", algorithm);
     }
     double timeTaken = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
     double flops = numOps / timeTaken;
-    freeMatrix(&C);
+    freeMatrix(C);
 
     return flops;
 }
@@ -55,24 +55,24 @@ int main() {
     printf("\n");
     fprintf(file, "\n");
 
-    matrix_t A, B;
+    matrix_t *A, *B;
     for (size_t i = 0; i < 8; i++) {
         printf("%-15lu", matrixSizes[i]);
         fprintf(file, "%lu", matrixSizes[i]);
         for (size_t j = 0; j < NUM_DTYPES; j++) {
             A = createMatrix(matrixSizes[i], matrixSizes[i], j);
             B = createMatrix(matrixSizes[i], matrixSizes[i], j);
-            if ((A.data == NULL) || (B.data == NULL)) {
+            if ((A->data == NULL) || (B->data == NULL)) {
                 printf("Failed to create matrix.");
                 return -1;
             }
             for (size_t k = 0; k < NUM_MATMUL_ALGOS; k++) {
-                double flops = evaluateMatmulAlgorithmFlops(&A, &B, algorithms[k]);
+                double flops = evaluateMatmulAlgorithmFlops(A, B, algorithms[k]);
                 printf("%.2f \t", flops / 1e9);
                 fprintf(file, ",%.2f", flops);
             }
-            freeMatrix(&A);
-            freeMatrix(&B);
+            freeMatrix(A);
+            freeMatrix(B);
         }
         printf("\n");
         fprintf(file, "\n");
