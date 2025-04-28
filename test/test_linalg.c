@@ -10,10 +10,33 @@ void testLinalg() {
     testTranspose();
 }
 
+void testMatmulResult(matrix_t *A, matrix_t *B, matrix_t *expectedResult) {
+    EMatmulAlgorithm algorithms[NUM_ALGORITHMS] = { NAIVE, OPTIMIZED_LOOP_ORDER, BLAS_GEMM };
+    matrix_t *C;
+    int srcDtype = A->dtype;
+    for (size_t j = 0; j < NUM_DTYPES; j++) {
+        castMatrixTo(A, j);
+        castMatrixTo(B, j);
+        castMatrixTo(expectedResult, j);
+        for (size_t i = 0; i < NUM_ALGORITHMS; i++) {
+            C = matmul(A, B, algorithms[i]);
+            assert(C != NULL);
+            assert(C->data != NULL);
+            assert(testMatrixEquality(C, expectedResult, EPS));
+            printf("[TEST: Matmul with algorithm %d and dtype %d] PASSED\n", algorithms[i], j);
+            freeMatrix(C);
+        }
+    }
+    castMatrixTo(A, srcDtype);
+    castMatrixTo(B, srcDtype);
+    castMatrixTo(expectedResult, srcDtype);
+}
+
 void testMatmul() {
     matrix_t *A = createMatrix(3U, 4U, DTYPE_INT);
     assert(A != NULL);
     assert(A->data != NULL);
+
     matrix_t *B = createMatrix(4U, 5U, DTYPE_INT);
     assert(B != NULL);
     assert(B->data != NULL);
@@ -80,25 +103,38 @@ void testMatmul() {
     expResData[12] = 8;
     expResData[13] = 4;
     expResData[14] = 8;
-    EMatmulAlgorithm algorithms[NUM_ALGORITHMS] = { NAIVE, OPTIMIZED_LOOP_ORDER, BLAS_GEMM };
-    MatrixDType dtypes[3] = { DTYPE_INT, DTYPE_FLOAT, DTYPE_DOUBLE };
-    
-    matrix_t *C;
-    for (size_t j = 0; j < NUM_DTYPES; j++) {
-        castMatrixTo(A, j);
-        castMatrixTo(B, j);
-        castMatrixTo(expectedResult, j);
-        for (size_t i = 0; i < NUM_ALGORITHMS; i++) {
-            C = matmul(A, B, algorithms[i]);
-            assert(C != NULL);
-            assert(C->data != NULL);
-            assert(testMatrixEquality(C, expectedResult, EPS));
-            printf("[TEST: Matmul with algorithm %d and dtype %d] PASSED\n", algorithms[i], j);
-            freeMatrix(C);
-        }
-    }
+
+    testMatmulResult(A, B, expectedResult);
+
+    // get A by transposing its transpose
+    matrix_t *AT = createMatrix(4U, 3U, DTYPE_INT);
+    assert(AT != NULL);
+    assert(AT->data != NULL);
+    int *atData = (int *)AT->data;
+    atData[0] = 4;
+    atData[1] = 0;
+    atData[2] = 0;
+
+    atData[3] = 2;
+    atData[4] = 2;
+    atData[5] = 1;
+
+    atData[6] = 4;
+    atData[7] = 1;
+    atData[8] = 2;
+
+    atData[9] = 0;
+    atData[10] = 0;
+    atData[11] = 1;
+
+    matrix_t *A_view_transform = transpose(AT);
+    assert(testMatrixEquality(A, A_view_transform, EPS));
+    testMatmulResult(A_view_transform, B, expectedResult);
     freeMatrix(A);
+    freeMatrix(AT);
+    freeMatrix(A_view_transform);
     freeMatrix(B);
+    freeMatrix(expectedResult);
 }
 
 void testTranspose() {

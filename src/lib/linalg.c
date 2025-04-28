@@ -181,7 +181,6 @@ void matmulLoopOrderOptimizedDouble(matrix_t *A, matrix_t *B, matrix_t *result) 
 
 #ifdef CBLAS_AVAILABLE
 void matmulBlas(matrix_t *A, matrix_t *B, matrix_t *result) {
-    // TODO: Use strides in function calls
     openblas_set_num_threads(4);
     switch (A->dtype) {
         case DTYPE_INT:
