@@ -9,9 +9,14 @@
 ## Matrix multiplication
 
 Problem statement.
-Explain how matrices are multiplied mathematically.
+* Explain how matrices are multiplied mathematically.
+* Explain computational complexity of matmul --> O(2n^3)
 
-## Representing a matrix
+## The matrix datastructure
+
+A matrix is a collection of elements on a two-dimensional grid having a shared data type. Representing a matrix in C while fullfilling requirements for enabling advanced use-cases is not as straightforward as one might think. Therefore, we will build it from scratch in an iterative manner in this section. We will begin with the possibly simplest approach and then iteratively reduce the list of drawbacks in order to converge to the final matrix datastructure.
+
+### The naive approach
 For now the discussion will be restricted to matrices with a specific data type of each element, e.g. single-precision floating point numbers (float). This assumption will be relaxed after building the foundations for representing this subset of general matrices.
 
 Since a matrix is nothing else than a collection of numbers on a 2D grid the straightfoward way for representing it in C is a 2D array.
@@ -19,17 +24,10 @@ Since a matrix is nothing else than a collection of numbers on a 2D grid the str
 ```C
 float matrix[5][8];
 ```
+This is easily implemented and also comes with strightforward element access via the bracket operator. Additionally there is no need for dynamic memory management. But this is also a major drawback. Since the size of the stack is constraint we might run out of memory when allocating a very large matrix. Furthermore, the dimensions of the matrix need to be known at compile time which might not be possible in some use-cases.
 
-Pro:
-* Indexing straight forward: matrix[rowIdx][colIdx]
-* No memory management needed
-
-Despite being very simple this approach has several limitations
-* Matrix shape needs to be known at compile time
-* Matrix is allocated on the stack. Since the stack size is limited this can be a constraint in the representable matrix sizes.
-* No way to handle multiple data types in downstream computations
-
-In order to avoid these drawbacks we consider a more complicated definition of a matrix. Therefore a struct is defined which will contain important meta data and most importantly a pointer to the first element of the matrix.
+### Dynamic memory allocation
+In order to avoid these drawbacks we consider a more advanced definition of a matrix. Therefore a struct is defined which will contain important meta data and most importantly a pointer to the first element of the matrix.
 
 ```C
 typedef struct {
@@ -69,8 +67,8 @@ void freeMatrix(matrix_t *matrix) {
   matrix->numCols = 0;
 }
 ```
-
-Now let us address the third drawback, which is that we are currently only able to represent float matrices. We start by defining an enum representing the data type.
+### Adressing different data types
+Now let us address the third drawback of the naive approach, which is that we are currently only able to represent float matrices. We start by defining an enum representing the data type.
 
 ```C
 typedef enum {
@@ -104,7 +102,7 @@ matrix_t createMatrix(size_t numRows, size_t numCols, MatrixDType dtype) {
       elementSize = sizeof(float);
       break;
     case DTYPE_DOUBLE:
-      elementSoze = sizeof(double);
+      elementSize = sizeof(double);
       break;
     default:
       matrix.data = NULL;
@@ -136,3 +134,47 @@ Since accessing elements of the matrix is a quite common use case and the operat
 // TODO: Setter and getter
 ```
 We will revisit this issue once we implement the matrix multiplication.
+
+### Enabling zero cost shape operations
+The last extension of the data structure is the introduction of *column* and *row strides*. These encode by which value an element pointer needs to be increased in order to move to the next element along one of the two matrix dimensions. Using strides for element access enables shape operations to have basically zero cost. For example a matrix transpose can be achived by modifying the strides and the shape of the matrix while keeping the data buffer unmodified. The final datastructure is then given by
+```
+typedef struct matrix {
+    void *data;
+    size_t numRows;
+    size_t numCols;
+    size_t strides[2];
+    MatrixDType dtype;
+    size_t refcount;
+    struct matrix *base;
+    int ownsData;
+} matrix_t;
+```
+
+### The matrix view
+As you might noticed there is one more thing. The final version of the matrix datastructure includes several new fields: the `refcount`, a pointer to a base matrix object (`base`) and a flag indicating data ownership (`ownsData`). But why do we need it?
+These are necessary to introduce the concept of a *view*. A view is a standard matrix object with the distinction that it does not own the data buffer but inherited it from some base matrix. Since shape operations do not modify the data itself but only the meta-data we do not want to allocate new memory for the results of these operations. We want that the result of shape operations *share* a data buffer with the source operand. Therefore, a view can be returned instead.
+
+Freeing the allocated memory gets now more involved since we need to keep track of which matrix objects still need to access the data buffer. This can be seen best in the `freeMatrix` function
+```
+void freeMatrix(matrix_t *matrix) {
+    matrix->refcount--;
+    if (matrix->refcount == 0) {
+        if (matrix->ownsData && matrix->data != NULL) {
+            free(matrix->data);
+            matrix->data = NULL;
+            matrix->numRows = 0u;
+            matrix->numCols = 0u;
+            matrix->strides[0] = 0u;
+            matrix->strides[1] = 0u;
+        }
+        if (matrix->base) {
+            freeMatrix(matrix->base);
+        }
+        free(matrix);
+    }
+}
+```
+As can be seen the memory is now only freed if there are no references to it by external views indicated by the `refcount` and if the object owns the data buffer. 
+
+### Alternative representation of the data buffer
+Instead of having the data buffer be represented as a single contiguous array it would also have been possible to use an array of pointers for the matrix elements. This would avoid index calculations when accessing elements but at the cost of a potential heap fragmentation and making movement operations like the matrix transpose more involved. Furthermore having a single contiguous array enables scaling the matrix datastructure beyond two dimensions to a multi-dimensional array (a *tensor*) straight forward.
